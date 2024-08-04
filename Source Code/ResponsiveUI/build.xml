@@ -1,0 +1,162 @@
+<!-- ##################### -->
+<!-- # @author Airondlph # -->
+<!-- ##################### -->
+<project name="ResponsiveUI" default="dist" basedir=".">
+	<description>Builds, tests, and runs the project: ${ant.project.name}</description>
+
+	<target name="load-properties">
+		<property file="build.properties" />
+	</target>
+
+	<target name="info" depends="load-properties">
+		<echo>Builds, tests, and runs the project: ${ant.project.name}</echo>
+		<echo></echo>
+		<echo>Versions:</echo>
+		<echo> - Ant: ${ant.version}</echo>
+        <echo />
+        <echo>Modules:</echo>
+        <echo> - ResposiveUI</echo>
+        <echo> - ResposiveUI-test</echo>
+	</target>
+	
+	<target name="init" depends="load-properties">
+		<tstamp/>
+	</target>
+    
+	<target name="clean" depends="init, load-properties, clean-responsiveUI, clean-responsiveUI-test">
+        <delete dir="${build.dir}" />
+        <delete dir="${dist.dir}" />
+    </target>
+
+    <target name="clean-all" depends="clean"/>
+
+	<target name="build" depends="init, load-properties, clean, build-responsiveUI, build-responsiveUI-test" />
+	
+    <target name="dist" depends="init, load-properties, clean, build, dist-responsiveUI, dist-responsiveUI-test" />
+    
+    <target name="run" depends="init, load-properties, clean, dist, run-responsiveUI-test" />
+
+	<target name="javadoc" depends="init, load-properties">
+        <echo>Not implemented</echo>
+    </target>
+
+    <target name="test" depends="init, load-properties">
+        <!-- JUnit tests -->
+        <echo>Not implemented</echo>
+    </target>
+
+<!--
+    ####################
+    ### FIRST MODULE ###
+    ####################
+-->
+
+    <target name="clean-responsiveUI" depends="init, load-properties">
+        <delete dir="${responsiveUI.build.dir}" />
+        <delete dir="${responsiveUI.dist.dir}" />
+    </target>
+
+    <target name="build-responsiveUI" depends="init, load-properties, clean-responsiveUI">
+        <mkdir dir="${responsiveUI.build.dir}" />
+       
+        <path id="classpath-responsiveUI">
+            <!--
+            <fileset dir="${lib.dir}">
+                <include name="**/*.jar"/>
+            </fileset>
+            -->
+        </path>
+
+        <path id="modulepath-responsiveUI">
+            <pathelement location="${lib.dir}" />
+        </path>
+
+        <javac destdir="${responsiveUI.build.dir}">
+            <src path="${responsiveUI.src.dir}" />
+            <classpath refid="classpath-responsiveUI" />
+            <modulepath refid="modulepath-responsiveUI" />
+        </javac>
+    </target>
+
+    <target name="dist-responsiveUI" depends="init, load-properties, build-responsiveUI">
+        <mkdir dir="${responsiveUI.dist.dir}" />
+        <jar destfile="${responsiveUI.dist.dir}/${responsiveUI.jar.name}"
+            basedir="${responsiveUI.build.dir}"
+            includes="**/*.class">
+            <manifest>
+                <attribute name="Main-Class" value="${responsiveUI.mainClass}" />
+            </manifest>
+        </jar>
+    </target>
+
+
+    <target name="run-responsiveUI" depends="init, load-properties, dist-responsiveUI">
+        <path id="modulepath-responsiveUI">
+            <pathelement location="${lib.dir}" />
+            <pathelement location="${responsiveUI.dist.dir}" />
+        </path>
+                
+        <java fork="true" 
+            failonerror="true"
+            module="${responsiveUI.module}"
+            classname="${responsiveUI.mainClass}"
+            modulepathref="modulepath-responsiveUI" />
+    </target>
+
+
+<!--
+    ###########################
+    ### FIRST MODULE - Test ###
+    ###########################
+-->
+
+    <target name="clean-responsiveUI-test" depends="init, load-properties">
+        <delete dir="${responsiveUI.test.build.dir}" />
+        <delete dir="${responsiveUI.test.dist.dir}" />
+    </target>
+
+    <target name="build-responsiveUI-test" depends="init, load-properties, clean-responsiveUI-test, dist-responsiveUI">
+        <mkdir dir="${responsiveUI.test.build.dir}" />
+
+        <path id="classpath-responsiveUI-test">
+        </path>
+
+        <path id="modulepath-responsiveUI-test">
+            <pathelement location="${responsiveUI.dist.dir}" />
+        </path>
+        
+        <javac destdir="${responsiveUI.test.build.dir}">
+            <src path="${responsiveUI.test.src.dir}" />
+            <classpath refid="classpath-responsiveUI-test" />
+            <modulepath refid="modulepath-responsiveUI-test" />
+        </javac>
+    </target>
+
+
+    <target name="dist-responsiveUI-test" depends="init, load-properties, build-responsiveUI-test">
+        <mkdir dir="${responsiveUI.test.dist.dir}" />
+        <jar destfile="${responsiveUI.test.dist.dir}/${responsiveUI.test.jar.name}"
+            basedir="${responsiveUI.test.build.dir}"
+            includes="**/*.class">
+            <manifest>
+                <attribute name="Main-Class" value="${responsiveUI.test.mainClass}" />
+            </manifest>
+        </jar>
+    </target>
+
+
+    <target name="run-responsiveUI-test" depends="init, load-properties, dist-responsiveUI-test">
+        <path id="responsiveUI-test-modulepath">
+            <pathelement location="${responsiveUI.test.dist.dir}"/>
+            <pathelement location="${responsiveUI.dist.dir}"/>
+            <pathelement location="${lib.dir}"/>
+        </path>
+
+        <java fork="true" 
+            failonerror="true"
+            module="${responsiveUI.test.module}"
+            classname="${responsiveUI.test.mainClass}"
+            modulepathref="responsiveUI-test-modulepath" />
+    </target>
+
+</project>
